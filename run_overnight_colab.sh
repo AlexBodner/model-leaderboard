@@ -4,12 +4,12 @@ set -e
 current_path=$(pwd)
 
 folders=(
+    "rtmdet" # ran
     'rf-detr'
     "yolov12" # ran
     "yolov9" # ran
     "d-fine"  # ran
     "rt-detr" # ran
-    "rtmdet" # ran
     "deim" # ran
     "yolov8" # ran
     "yolov10" #ran

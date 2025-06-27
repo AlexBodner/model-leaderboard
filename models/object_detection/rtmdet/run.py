@@ -53,6 +53,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 RUN_PARAMETERS = dict(
     imgsz=640,
     conf=CONFIDENCE_THRESHOLD,
+    max_det=100,
 )
 GIT_REPO_URL = "https://github.com/open-mmlab/mmyolo/tree/main/configs/rtmdet"
 PAPER_URL = "https://arxiv.org/abs/2212.07784"
@@ -95,7 +96,8 @@ def run_single_model(
         dataset = load_detections_dataset(DATASET_DIR)
 
     download_weight(model_id)
-
+    print(f"Model config: { model_values['config']}")
+    print("Model config test:", model_values['config']['model_test_cfg'])
     model = init_detector(
         model_values["config"], model_values["checkpoint_file"], DEVICE
     )
