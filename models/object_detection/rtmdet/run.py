@@ -103,7 +103,8 @@ def run_single_model(
     cfg = Config.fromfile(model_values['config'])
     print("Config loaded:", cfg)
     print("Original max_per_img:", cfg.model_test_cfg.get('max_per_img', None))
-    cfg.model_test_cfg.get("max_per_img") = RUN_PARAMETERS["max_det"]
+    
+    cfg.model_test_cfg["max_per_img"] = RUN_PARAMETERS["max_det"]
     model = init_detector(
         model_values["config"], model_values["checkpoint_file"], DEVICE
     )
