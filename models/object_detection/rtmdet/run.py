@@ -108,7 +108,7 @@ def run_single_model(
     #print("Config modified:", cfg)
 
     model = init_detector(
-        cfg model_values["checkpoint_file"], DEVICE
+        cfg, model_values["checkpoint_file"], DEVICE
     )
 
     predictions = []
