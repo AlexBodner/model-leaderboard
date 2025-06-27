@@ -62,9 +62,9 @@ PAPER_URL = "https://arxiv.org/abs/2212.07784"
 
 def run_on_image(model, image) -> sv.Detections:
     result = inference_detector(model, image)
-    all_boxes = [bbox for class_bboxes in result[0] for bbox in class_bboxes]
-    print("Number of detections returned:", len(all_boxes))
     detections = sv.Detections.from_mmdetection(result)
+    print("Number of detections returned:", len(detections))
+
     return detections
 
 
