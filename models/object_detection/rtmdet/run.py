@@ -62,9 +62,8 @@ PAPER_URL = "https://arxiv.org/abs/2212.07784"
 
 def run_on_image(model, image) -> sv.Detections:
     result = inference_detector(model, image)
-    if isinstance(result, (list, tuple)):
-        all_boxes = [bbox for class_bboxes in result[0] for bbox in class_bboxes]
-        print("Number of detections returned:", len(all_boxes))
+    all_boxes = [bbox for class_bboxes in result[0] for bbox in class_bboxes]
+    print("Number of detections returned:", len(all_boxes))
     detections = sv.Detections.from_mmdetection(result)
     return detections
 
@@ -101,11 +100,12 @@ def run_single_model(
 
     download_weight(model_id)
     cfg = Config.fromfile(model_values['config'])
-    print("Config loaded:", cfg)
-    print("Original max_per_img:", cfg.model_test_cfg.get('max_per_img', None))
+    #print("Config loaded:", cfg)
+    #print("Original max_per_img:", cfg.RUN_PARAMETERS["max_det"].get('max_per_img', None))
 
-    cfg.model_test_cfg["max_per_img"] = RUN_PARAMETERS["max_det"]
-    print("Config modified:", cfg)
+    #cfg.model_test_cfg["max_per_img"] = RUN_PARAMETERS["max_det"]
+    cfg.model.test_cfg.max_per_img = RUN_PARAMETERS["max_det"]
+    #print("Config modified:", cfg)
 
     model = init_detector(
         model_values["config"], model_values["checkpoint_file"], DEVICE
