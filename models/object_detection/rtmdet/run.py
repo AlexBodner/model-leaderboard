@@ -9,6 +9,7 @@ import torch
 from mmdet.apis import inference_detector, init_detector
 from supervision.metrics import F1Score, MeanAveragePrecision
 from tqdm import tqdm
+from mmengine import Config  # Add this import
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -61,6 +62,9 @@ PAPER_URL = "https://arxiv.org/abs/2212.07784"
 
 def run_on_image(model, image) -> sv.Detections:
     result = inference_detector(model, image)
+    if isinstance(result, (list, tuple)):
+        all_boxes = [bbox for class_bboxes in result[0] for bbox in class_bboxes]
+        print("Number of detections returned:", len(all_boxes))
     detections = sv.Detections.from_mmdetection(result)
     return detections
 
@@ -96,8 +100,10 @@ def run_single_model(
         dataset = load_detections_dataset(DATASET_DIR)
 
     download_weight(model_id)
-    print(f"Model config: { model_values['config']}")
-    print("Model config test:", model_values['config']['model_test_cfg'])
+    cfg = Config.fromfile(model_values['config'])
+    print("Config loaded:", cfg)
+    print("Original max_per_img:", cfg.model_test_cfg.get('max_per_img', None))
+    cfg.model_test_cfg.get("max_per_img") = RUN_PARAMETERS["max_det"]
     model = init_detector(
         model_values["config"], model_values["checkpoint_file"], DEVICE
     )
