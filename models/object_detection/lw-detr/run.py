@@ -10,7 +10,7 @@ from PIL import Image
 from supervision.metrics import F1Score, MeanAveragePrecision
 from tqdm import tqdm
 import os
-from util.utils import ModelEma, BestMetricHolder, clean_state_dict
+from huggingface_hub import list_repo_files, hf_hub_download
 
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -21,8 +21,18 @@ from utils import (
     load_detections_dataset,
     result_json_already_exists,
     write_result_json,
+    run_shell_command
 )
-from huggingface_hub import list_repo_files, hf_hub_download
+
+if not Path("D-FINE").is_dir():
+    run_shell_command(
+        ["git", "clone", "https://github.com/Atten4Vis/LW-DETR.git", "./LW-DETR/"]
+    )
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./LW-DETR/")))
+from util.utils import ModelEma, BestMetricHolder, clean_state_dict
+from models import build_model
+
+
 REPO_ID = "xbsu/LW-DETR"
 SUBDIR = "pretrain_weights"
 # 2. List all files in the repo
@@ -69,7 +79,7 @@ def run_single_model(
     local_path = hf_hub_download(repo_id=REPO_ID, filename=file_path)
 
     model, criterion, postprocessors = build_model(args)
-    model.to(device)
+    model.to(DEVICE)
     if args.use_ema:
         ema_m = ModelEma(model, decay=args.ema_decay)
     else:
