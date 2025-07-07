@@ -12,7 +12,6 @@ from tqdm import tqdm
 import os
 from huggingface_hub import list_repo_files, hf_hub_download
 from torchvision import transforms
-from util.misc import nested_tensor_from_tensor_list
 
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -32,6 +31,8 @@ if not Path("D-FINE").is_dir():
     )
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./LW-DETR/")))
 from util.utils import ModelEma, BestMetricHolder, clean_state_dict
+from util.misc import nested_tensor_from_tensor_list
+
 from models import build_model
 
 
