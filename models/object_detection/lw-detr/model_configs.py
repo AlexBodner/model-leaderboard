@@ -20,6 +20,7 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
     'use_ema': True,
     'eval': True,
     'dataset_file': 'coco',
+    'device': 'cuda',
 
     },
     'lwdetr_small_60e_coco':{
@@ -40,6 +41,7 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
     'num_select': 300,
     'confidence_threshold': 0.5,
     'dataset_file': 'coco',
+    'device': 'cuda',
 
     },
     'lwdetr_xlarge_60e_coco':{
@@ -63,6 +65,7 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
         'use_ema': True,
         'eval': True,
         'dataset_file': 'coco',
+        'device': 'cuda',
 
         },
     'lwdetr_medium_60e_coco':{
@@ -106,7 +109,9 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
         'dataset_file': 'coco',
         'square_resize_div_64': True,
         'use_ema': True,
-        'eval': True
+        'eval': True,
+        'device': 'cuda'
+
     }
 
     }
