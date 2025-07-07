@@ -60,7 +60,7 @@ for folder in ${folders[@]}; do
 
         fi
         if [[ $folder == lw-detr* ]]; then
-            if [ ! -d "$FOLDER" ] ; then
+            if [ ! -d "LW-DETR" ] ; then
                 git clone https://github.com/Atten4Vis/LW-DETR.git
             fi
             cd LW-DETR/models/ops
