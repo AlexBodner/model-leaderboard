@@ -165,6 +165,8 @@ def run_single_model(
     print("Evaluating...")
     for img_path, image, target_detections in tqdm(dataset, total=len(dataset)):
         image, orig_image_size = preprocess_image(img_path)
+        image = image.to(DEVICE)
+        orig_image_size = orig_image_size.to(DEVICE)
         images = nested_tensor_from_tensor_list([image])
         # forward
         with torch.no_grad():
