@@ -12,6 +12,7 @@ from tqdm import tqdm
 import os
 from huggingface_hub import list_repo_files, hf_hub_download
 from torchvision import transforms
+from types import SimpleNamespace
 
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -94,15 +95,23 @@ def run_single_model(
         dataset = load_detections_dataset(DATASET_DIR)
     local_path = hf_hub_download(repo_id=REPO_ID, filename=file_path)
 
-    model, criterion, postprocessors = build_model(args)
+    cfg = SimpleNamespace(
+        hidden_dim=256,
+        dec_layers=3,
+        num_queries=100,
+        encoder='vit_tiny',
+        use_ema=False,
+        ema_decay=0.9997,
+    )
+    model, criterion, postprocessors = build_model(cfg)
     checkpoint = torch.load(local_path, map_location='cpu')
     model.load_state_dict(checkpoint['model'], strict=True)
 
     model.to(DEVICE)
     model.eval()
 
-    if args.use_ema:
-        ema_m = ModelEma(model, decay=args.ema_decay)
+    if cfg.use_ema:
+        ema_m = ModelEma(model, decay=cfg.ema_decay)
     else:
         ema_m = None
     predictions = []
