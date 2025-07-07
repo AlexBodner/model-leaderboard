@@ -121,7 +121,7 @@ default_model_parameters = {
 
 def preprocess_image(image_path):
     image = Image.open(image_path).convert("RGB")
-    orig_image_size = torch.tensor(image.size[::])
+    orig_image_size = torch.tensor(image.size[::-1])
 
     normalize = transforms.Compose(
         [
@@ -132,7 +132,7 @@ def preprocess_image(image_path):
     transform = transforms.Compose(
         [
             transforms.Resize([640, 640]),
-            normalize,
+           # normalize,
         ]
     )
     image = transform(image)
@@ -210,6 +210,8 @@ def run_single_model(
 
     mAP_metric = MeanAveragePrecision()
     f1_metric = F1Score()
+    print("predictions",predictions)
+    print("target",predictions)
     f1_result = f1_metric.update(predictions, targets).compute()
     mAP_result = mAP_metric.update(predictions, targets).compute()
 
