@@ -66,6 +66,7 @@ for folder in ${folders[@]}; do
             cd LW-DETR/models/ops
 
             $VENV_PIP install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+            $VENV_PIP install -U git+https://github.com/qubvel/transformers@fix-custom-kernels
 
             $VENV_PY setup.py build install
             cd ../../..
