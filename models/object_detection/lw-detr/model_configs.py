@@ -19,6 +19,8 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
     'square_resize_div_64': True,
     'use_ema': True,
     'eval': True,
+    'dataset_file': 'coco',
+
     },
     'lwdetr_small_60e_coco':{
     'encoder': 'vit_tiny',
@@ -37,6 +39,8 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
     'lite_refpoint_refine': True,
     'num_select': 300,
     'confidence_threshold': 0.5,
+    'dataset_file': 'coco',
+
     },
     'lwdetr_xlarge_60e_coco':{
         'batch_size': 1,
@@ -58,6 +62,8 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
         'square_resize_div_64': True,
         'use_ema': True,
         'eval': True,
+        'dataset_file': 'coco',
+
         },
     'lwdetr_medium_60e_coco':{
         'batch_size': 1,
