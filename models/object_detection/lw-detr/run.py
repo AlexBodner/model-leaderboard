@@ -191,7 +191,6 @@ def run_single_model(
         boxes = preds[0]["boxes"].cpu().numpy()
         labels = preds[0]["labels"].cpu().numpy()
         scores = preds[0]["scores"].cpu().numpy()
-
         class_id = np.atleast_1d(labels).astype(int)
         xyxy = np.atleast_2d(boxes)
         confidence = np.atleast_1d(scores)
@@ -210,6 +209,8 @@ def run_single_model(
 
     mAP_metric = MeanAveragePrecision()
     f1_metric = F1Score()
+    print("labels", labels)
+
     print("predictions",predictions)
     print("target",predictions)
     f1_result = f1_metric.update(predictions, targets).compute()
