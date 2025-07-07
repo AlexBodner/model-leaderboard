@@ -59,6 +59,14 @@ for folder in ${folders[@]}; do
             $VENV_PIP install onnxruntime-gpu
 
         fi
+        if [[ $folder == lw-detr* ]]; then
+            git clone https://github.com/Atten4Vis/LW-DETR.git
+            cd LW-DETR/models/ops
+            $VENV_PY setup.py build install
+            cd ../../..
+        fi
+
+
         # Run script
         $VENV_PY run.py
         # Copy only .json files to Drive
