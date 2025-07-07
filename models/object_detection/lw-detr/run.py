@@ -182,9 +182,9 @@ def run_single_model(
         scores = predictions[0]['scores'].cpu().numpy()
 
 
-        class_id = labels.detach().cpu().numpy().astype(int)
-        xyxy = boxes.detach().cpu().numpy()
-        confidence = scores.detach().cpu().numpy()
+        class_id = labels.astype(int)
+        xyxy = boxes
+        confidence = scores
 
         detections = sv.Detections(
             xyxy=xyxy[0],
