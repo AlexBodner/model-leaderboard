@@ -174,12 +174,12 @@ def run_single_model(
 
         orig_image_sizes = torch.stack([orig_image_size])
         # postprocess
-        predictions = postprocessors['bbox'](outputs, orig_image_sizes)
+        preds= postprocessors['bbox'](outputs, orig_image_sizes)
 
         # visualize
-        boxes = predictions[0]['boxes'].cpu().numpy()
-        labels = predictions[0]['labels'].cpu().numpy()
-        scores = predictions[0]['scores'].cpu().numpy()
+        boxes = preds[0]['boxes'].cpu().numpy()
+        labels = preds[0]['labels'].cpu().numpy()
+        scores = preds[0]['scores'].cpu().numpy()
 
 
         class_id = np.atleast_1d(labels).astype(int)
