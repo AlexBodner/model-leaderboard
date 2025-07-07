@@ -1,3 +1,4 @@
+supervision @ git+https://github.com/roboflow/supervision.git@develop
 cython
 pycocotools
 torch>=1.13.0
@@ -7,3 +8,5 @@ scipy
 timm
 tqdm
 opencv-python
+huggingface_hub
+matplotlib
