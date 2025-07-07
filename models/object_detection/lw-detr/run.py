@@ -25,10 +25,10 @@ from utils import (
     run_shell_command
 )
 
-if not Path("D-FINE").is_dir():
-    run_shell_command(
-        ["git", "clone", "https://github.com/Atten4Vis/LW-DETR.git", "./LW-DETR/"]
-    )
+# if not Path("D-FINE").is_dir():
+#     run_shell_command(
+#         ["git", "clone", "https://github.com/Atten4Vis/LW-DETR.git", "./LW-DETR/"]
+#     )
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./LW-DETR/")))
 from util.utils import ModelEma, BestMetricHolder, clean_state_dict
 from util.misc import nested_tensor_from_tensor_list
