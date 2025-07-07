@@ -187,9 +187,9 @@ def run_single_model(
         confidence = np.atleast_1d(scores)
 
         detections = sv.Detections(
-            xyxy=xyxy[0],
-            confidence=confidence[0],
-            class_id=class_id[0],
+            xyxy=xyxy,
+            confidence=confidence,
+            class_id=class_id,
         )
 
         detections = detections[detections.confidence > CONFIDENCE_THRESHOLD]
