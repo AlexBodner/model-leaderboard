@@ -121,7 +121,7 @@ default_model_parameters = {
 
 def preprocess_image(image_path):
     image = Image.open(image_path).convert("RGB")
-    orig_image_size = torch.tensor(image.size[::-1])
+    orig_image_size = torch.tensor(image.size[::])
 
     normalize = transforms.Compose(
         [
@@ -153,7 +153,10 @@ def run_single_model(
         dataset = load_detections_dataset(DATASET_DIR)
     local_path = hf_hub_download(repo_id=REPO_ID, filename=MODEL_DICT[model_id])
 
-    model_cfg = MODEL_CONFIGS[model_id.lower()]
+    model_cfg = MODEL_CONFIGS.get(model_id.lower(), None)
+    if model_cfg is None:
+        print("There is no config available for model:", model_id.lower())
+        return
     model_cfg.update(default_model_parameters)
     cfg = SimpleNamespace(**model_cfg)
 
@@ -221,7 +224,9 @@ def run_single_model(
         license_name=LICENSE,
         run_parameters=RUN_PARAMETERS,
     )
+    print(f"mAP result 50:95 100 dets: {mAP_result.map50_95}")
 
+    print(f"mAP result 50:95 100 dets rounded: {mAP_result.map50_95:.3f}")
 
 def run(
     model_ids: List[str],
