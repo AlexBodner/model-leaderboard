@@ -60,8 +60,13 @@ for folder in ${folders[@]}; do
 
         fi
         if [[ $folder == lw-detr* ]]; then
-            git clone https://github.com/Atten4Vis/LW-DETR.git
+            if [ ! -d "$FOLDER" ] ; then
+                git clone https://github.com/Atten4Vis/LW-DETR.git
+            fi
             cd LW-DETR/models/ops
+
+            $VENV_PIP install torch==1.12.1 torchvision==0.13.1
+
             $VENV_PY setup.py build install
             cd ../../..
         fi
