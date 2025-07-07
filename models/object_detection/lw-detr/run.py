@@ -13,7 +13,7 @@ import os
 from huggingface_hub import list_repo_files, hf_hub_download
 from torchvision import transforms
 from types import SimpleNamespace
-
+import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import multiprocessing
@@ -182,9 +182,9 @@ def run_single_model(
         scores = predictions[0]['scores'].cpu().numpy()
 
 
-        class_id = labels.astype(int)
-        xyxy = boxes
-        confidence = scores
+        class_id = np.atleast_1d(labels).astype(int)
+        xyxy = np.atleast_2d(boxes)
+        confidence = np.atleast_1d(scores)
 
         detections = sv.Detections(
             xyxy=xyxy[0],
