@@ -78,5 +78,29 @@ MODEL_CONFIGS = {'lwdetr_large_60e_coco':{
         'num_select': 300,
         'square_resize_div_64': True,
         'use_ema': True,
-        'eval': True,}
+        'eval': True,},
+        'lwdetr_tiny_60e_coco': {
+        'batch_size': 1,
+        'encoder': 'vit_tiny',
+        'vit_encoder_num_layers': 6,
+        'window_block_indexes': [0, 2, 4],
+        'out_feature_indexes': [1, 3, 5],
+        'dec_layers': 3,
+        'group_detr': 13,
+        'two_stage': True,
+        'projector_scale': ['P4'],
+        'hidden_dim': 256,
+        'sa_nheads': 8,
+        'ca_nheads': 16,
+        'dec_n_points': 2,
+        'bbox_reparam': True,
+        'lite_refpoint_refine': True,
+        'num_queries': 100,
+        'num_select': 100,
+        'dataset_file': 'coco',
+        'square_resize_div_64': True,
+        'use_ema': True,
+        'eval': True
+    }
+
     }
