@@ -92,7 +92,60 @@ def run_single_model(
 
 
     cfg = SimpleNamespace(
-        **MODEL_CONFIGS[model_id.lower()]
+        **MODEL_CONFIGS[model_id.lower() .update(
+            {'lr': 1e-4,
+            'lr_encoder': 1.5e-4,
+            'weight_decay': 1e-4,
+            'epochs': 12,
+            'lr_drop': 11,
+            'clip_max_norm': 0.1,
+            'lr_vit_layer_decay': 0.8,
+            'lr_component_decay': 1.0,
+            'dropout': 0,
+            'drop_path': 0,
+            'drop_mode': 'standard',
+            'drop_schedule': 'constant',
+            'cutoff_epoch': 0,
+            'position_embedding': 'sine',
+            'dim_feedforward': 2048,
+            'decoder_norm': 'LN',
+            'set_cost_class': 2.0,
+            'set_cost_bbox': 5.0,
+            'set_cost_giou': 2.0,
+            'cls_loss_coef': 2.0,
+            'bbox_loss_coef': 5.0,
+            'giou_loss_coef': 2.0,
+            'focal_alpha': 0.25,
+            'aux_loss': True,
+            'sum_group_losses': False,
+            'use_varifocal_loss': False,
+            'use_position_supervised_loss': False,
+            'ia_bce_loss': False,
+            'pretrained_encoder': None,
+            'pretrain_weights': None,
+            'pretrain_exclude_keys': None,
+            'pretrain_keys_modify_to_load': None,
+            'output_dir': 'output',
+            'checkpoint_interval': 10,
+            'seed': 42,
+            'resume': '',
+            'start_epoch': 0,
+            'ema_decay': 0.9997,
+            'num_workers': 2,
+            'device': 'cuda',
+            'world_size': 1,
+            'dist_url': 'env://',
+            'sync_bn': True,
+            'fp16_eval': False,
+
+            # ONNX export default (unused unless --subcommand is export_model)
+            'shape': (640, 640),
+            'infer_dir': None,
+            'verbose': False,
+            'opset_version': 17,
+            'simplify': False,
+            'tensorrt': False,
+            'dry-run': False})]
     )
     model, criterion, postprocessors = build_model(cfg)
     checkpoint = torch.load(local_path, map_location='cpu')
