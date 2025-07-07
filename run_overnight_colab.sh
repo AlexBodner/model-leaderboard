@@ -65,7 +65,7 @@ for folder in ${folders[@]}; do
             fi
             cd LW-DETR/models/ops
 
-            $VENV_PIP install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+            $VENV_PIP install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
             $VENV_PY setup.py build install
             cd ../../..
