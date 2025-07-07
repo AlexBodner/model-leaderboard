@@ -25,7 +25,7 @@ from utils import (
     write_result_json,
     run_shell_command
 )
-from configs import MODEL_CONFIGS
+from model_configs import MODEL_CONFIGS
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./LW-DETR/")))
 from util.utils import ModelEma, BestMetricHolder, clean_state_dict
