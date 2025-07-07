@@ -11,6 +11,8 @@ from supervision.metrics import F1Score, MeanAveragePrecision
 from tqdm import tqdm
 import os
 from huggingface_hub import list_repo_files, hf_hub_download
+from torchvision import transforms
+from util.misc import nested_tensor_from_tensor_list
 
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -63,7 +65,20 @@ TRANSFORMS = T.Compose(
 )
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+def preprocess_image(image_path):
+    image = Image.open(image_path).convert("RGB")
+    orig_image_size = torch.tensor(image.size[::-1])
 
+    normalize = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    transform = transforms.Compose([
+            transforms.Resize([640, 640]),
+            normalize,
+        ])
+    image = transform(image)
+    return image, orig_image_size
 def run_single_model(
     model_id: str,
     skip_if_result_exists=False,
@@ -79,7 +94,12 @@ def run_single_model(
     local_path = hf_hub_download(repo_id=REPO_ID, filename=file_path)
 
     model, criterion, postprocessors = build_model(args)
+    checkpoint = torch.load(local_path, map_location='cpu')
+    model.load_state_dict(checkpoint['model'], strict=True)
+
     model.to(DEVICE)
+    model.eval()
+
     if args.use_ema:
         ema_m = ModelEma(model, decay=args.ema_decay)
     else:
@@ -88,13 +108,22 @@ def run_single_model(
     targets = []
     print("Evaluating...")
     for img_path, image, target_detections in tqdm(dataset, total=len(dataset)):
-        img = Image.open(img_path).convert("RGB")
-        width, height = img.size
-        orig_size = torch.tensor([width, height])[None].to(DEVICE)
-        im_data = TRANSFORMS(img)[None].to(DEVICE)
+        image, orig_image_size = preprocess_image(img_path)
+        images = nested_tensor_from_tensor_list([image])
+        # forward
+        with torch.no_grad():
+            outputs = model(images)
 
-        results = model(im_data, orig_size)
-        labels, boxes, scores = results
+        orig_image_sizes = torch.stack([orig_image_size])
+        # postprocess
+        predictions = postprocessors['bbox'](outputs, orig_image_sizes)
+
+        # visualize
+        boxes = predictions[0]['boxes'].cpu().numpy()
+        labels = predictions[0]['labels'].cpu().numpy()
+        scores = predictions[0]['scores'].cpu().numpy()
+
+
         class_id = labels.detach().cpu().numpy().astype(int)
         xyxy = boxes.detach().cpu().numpy()
         confidence = scores.detach().cpu().numpy()

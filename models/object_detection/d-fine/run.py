@@ -22,12 +22,14 @@ from utils import (
     write_result_json,
 )
 
-if not Path("D-FINE").is_dir():
+if not Path("D-FINE-repo").is_dir():
     run_shell_command(
-        ["git", "clone", "https://github.com/Peterande/D-FINE.git", "./D-FINE/"]
+        ["git", "clone", "https://github.com/Peterande/D-FINE.git", "./D-FINE-repo/"]
     )
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./D-FINE/")))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "./D-FINE-repo/"))
+)
 
 from src.core import YAMLConfig
 
@@ -35,6 +37,7 @@ LICENSE = "Apache-2.0"
 RUN_PARAMETERS = dict(
     imgsz=640,
     conf=CONFIDENCE_THRESHOLD,
+    max_det=100,  # supervision uses internally, it is here just for logging
 )
 GIT_REPO_URL = "https://github.com/Peterande/D-FINE"
 PAPER_URL = "https://arxiv.org/abs/2410.13842"
@@ -47,35 +50,59 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 MODEL_DICT = {
+    "D-FINE-X-Objects365+COCO": {
+        "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_x_obj2coco.pth",
+        "model_filename": "dfine_x_obj2coco.pth",
+        "model_name": "D-FINE-X-Objects365+COCO",
+        "model_yaml": "./D-FINE-repo/configs/dfine/objects365/dfine_hgnetv2_x_obj2coco.yml",
+    },
+    "D-FINE-L-Objects365+COCO": {
+        "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_obj2coco_e25.pth",
+        "model_filename": "dfine_l_obj2coco_e25.pth",
+        "model_name": "D-FINE-L-Objects365+COCO",
+        "model_yaml": "./D-FINE-repo/configs/dfine/objects365/dfine_hgnetv2_l_obj2coco.yml",
+    },
+    "D-FINE-M-Objects365+COCO": {
+        "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_m_obj2coco.pth",
+        "model_filename": "dfine_m_obj2coco.pth",
+        "model_name": "D-FINE-M-Objects365+COCO",
+        "model_yaml": "./D-FINE-repo/configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml",
+    },
+    "D-FINE-S-Objects365+COCO": {
+        "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_s_obj2coco.pth",
+        "model_filename": "dfine_s_obj2coco.pth",
+        "model_name": "D-FINE-S-Objects365+COCO",
+        "model_yaml": "./D-FINE-repo/configs/dfine/objects365/dfine_hgnetv2_s_obj2coco.yml",
+    },
     "D-FINE-X": {
         "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_x_coco.pth",
         "model_filename": "dfine_x_coco.pth",
         "model_name": "D-FINE-X",
-        "model_yaml": "./D-FINE/configs/dfine/dfine_hgnetv2_x_coco.yml",
+        "model_yaml": "./D-FINE-repo/configs/dfine/dfine_hgnetv2_x_coco.yml",
     },
     "D-FINE-L": {
         "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_l_coco.pth",
         "model_filename": "dfine_l_coco.pth",
         "model_name": "D-FINE-L",
-        "model_yaml": "./D-FINE/configs/dfine/dfine_hgnetv2_l_coco.yml",
+        "model_yaml": "./D-FINE-repo/configs/dfine/dfine_hgnetv2_l_coco.yml",
     },
     "D-FINE-M": {
         "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_m_coco.pth",
         "model_filename": "dfine_m_coco.pth",
         "model_name": "D-FINE-M",
-        "model_yaml": "./D-FINE/configs/dfine/dfine_hgnetv2_m_coco.yml",
+        "model_yaml": "./D-FINE-repo/configs/dfine/dfine_hgnetv2_m_coco.yml",
     },
     "D-FINE-S": {
         "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_s_coco.pth",
         "model_filename": "dfine_s_coco.pth",
         "model_name": "D-FINE-S",
-        "model_yaml": "./D-FINE/configs/dfine/dfine_hgnetv2_s_coco.yml",
+        "model_yaml": "./D-FINE-repo/configs/dfine/dfine_hgnetv2_s_coco.yml",
     },
     "D-FINE-N": {
         "model_url": "https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_n_coco.pth",
         "model_filename": "dfine_n_coco.pth",
         "model_name": "D-FINE-N",
-        "model_yaml": "./D-FINE/configs/dfine/dfine_hgnetv2_n_coco.yml",
+        "model_yaml": "./D-FINE-repo/configs/dfine/dfine_hgnetv2_n_coco.yml",
     },
 }  # noqa: E501 // docs
 
@@ -92,7 +119,7 @@ def download_weight(url, model_filename):
 
 
 def run_on_image(model, image_array):
-    im_pil = Image.fromarray(image_array)
+    im_pil = Image.fromarray(image_array[..., ::-1])
     w, h = im_pil.size
     orig_size = torch.tensor([[w, h]]).to(DEVICE)
     im_data = TRANSFORMS(im_pil).unsqueeze(0).to(DEVICE)
@@ -107,6 +134,7 @@ def run_on_image(model, image_array):
         confidence=confidence[0],
         class_id=class_id[0],
     )
+    detections = detections[detections.confidence > RUN_PARAMETERS.get("conf")]
     return detections
 
 
@@ -130,7 +158,7 @@ def evaluate_single_model(
         download_weight(model_values["model_url"], model_values["model_filename"])
 
     # Re-initialize cfg and model for each iteration
-    cfg = YAMLConfig(model_values["model_yaml"], resume=model_values["model_filename"])
+    cfg = YAMLConfig( os.path.abspath(model_values["model_yaml"]), resume=model_values["model_filename"])
 
     if "HGNetv2" in cfg.yaml_cfg:
         cfg.yaml_cfg["HGNetv2"]["pretrained"] = False
@@ -168,7 +196,6 @@ def evaluate_single_model(
     print(f"Evaluating {model_id}...")
     for _, image, target_detections in tqdm(dataset, total=len(dataset)):
         detections = run_on_image(model, image)
-        detections = detections[detections.confidence > CONFIDENCE_THRESHOLD]
         predictions.append(detections)
         targets.append(target_detections)
 
@@ -189,7 +216,9 @@ def evaluate_single_model(
         license_name=LICENSE,
         run_parameters=RUN_PARAMETERS,
     )
+    print(f"mAP result 50:95 100 dets: {mAP_result.map50_95}")
 
+    print(f"mAP result 50:95 100 dets rounded: {mAP_result.map50_95:.3f}")
     del model
     del cfg
     if torch.cuda.is_available():
