@@ -65,7 +65,8 @@ for folder in ${folders[@]}; do
             fi
             cd LW-DETR/models/ops
 
-            $VENV_PIP install torch==1.12.1 torchvision==0.13.1
+            $VENV_PIP install pytorch==1.13.0 torchvision==0.14.0 pytorch-cuda=11.6 -c pytorch -c nvidia
+
 
             $VENV_PY setup.py build install
             cd ../../..
