@@ -65,8 +65,10 @@ for folder in ${folders[@]}; do
             fi
             cd LW-DETR/models/ops
 
-            $VENV_PIP install torch==1.15.2+cu118 torchvision==0.15.2+cu118 \
-            -f https://download.pytorch.org/whl/torch_stable.html
+            $VENV_PIP install --upgrade --force-reinstall \
+                torch torchvision \
+                --extra-index-url https://download.pytorch.org/whl/cu117
+
 
 
             $VENV_PY setup.py build install
