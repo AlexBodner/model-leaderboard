@@ -61,39 +61,7 @@ TRANSFORMS = T.Compose(
     [T.Resize((RUN_PARAMETERS["imgsz"], RUN_PARAMETERS["imgsz"])), T.ToTensor()]
 )
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-def preprocess_image(image_path):
-    image = Image.open(image_path).convert("RGB")
-    orig_image_size = torch.tensor(image.size[::-1])
-
-    normalize = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    transform = transforms.Compose([
-            transforms.Resize([640, 640]),
-            normalize,
-        ])
-    image = transform(image)
-    return image, orig_image_size
-def run_single_model(
-    model_id: str,
-    skip_if_result_exists=False,
-    dataset: Optional[sv.DetectionDataset] = None,
-) -> None:
-    model_values = MODEL_DICT[model_id]
-
-    if skip_if_result_exists and result_json_already_exists(model_id):
-        print(f"Skipping {model_id}. Result already exists!")
-        return
-    if dataset is None:
-        dataset = load_detections_dataset(DATASET_DIR)
-    local_path =  hf_hub_download(repo_id=REPO_ID, filename=MODEL_DICT[model_id])
-
-
-    cfg = SimpleNamespace(
-        **(MODEL_CONFIGS[model_id.lower()]|
-            {'lr': 1e-4,
+default_model_parameters =   {'lr': 1e-4,
             'lr_encoder': 1.5e-4,
             'weight_decay': 1e-4,
             'epochs': 12,
@@ -145,7 +113,39 @@ def run_single_model(
             'opset_version': 17,
             'simplify': False,
             'tensorrt': False,
-            'dry-run': False})
+            'dry-run': False}
+def preprocess_image(image_path):
+    image = Image.open(image_path).convert("RGB")
+    orig_image_size = torch.tensor(image.size[::-1])
+
+    normalize = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    transform = transforms.Compose([
+            transforms.Resize([640, 640]),
+            normalize,
+        ])
+    image = transform(image)
+    return image, orig_image_size
+def run_single_model(
+    model_id: str,
+    skip_if_result_exists=False,
+    dataset: Optional[sv.DetectionDataset] = None,
+) -> None:
+    model_values = MODEL_DICT[model_id]
+
+    if skip_if_result_exists and result_json_already_exists(model_id):
+        print(f"Skipping {model_id}. Result already exists!")
+        return
+    if dataset is None:
+        dataset = load_detections_dataset(DATASET_DIR)
+    local_path =  hf_hub_download(repo_id=REPO_ID, filename=MODEL_DICT[model_id])
+
+    model_cfg = MODEL_CONFIGS[model_id.lower()]
+    model_cfg.update(default_model_parameters)
+    cfg = SimpleNamespace(
+        **model_cfg
         )
     
     model, criterion, postprocessors = build_model(cfg)
