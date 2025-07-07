@@ -92,7 +92,7 @@ def run_single_model(
 
 
     cfg = SimpleNamespace(
-        **MODEL_CONFIGS[model_id.lower()] .update(
+        **(MODEL_CONFIGS[model_id.lower()]|
             {'lr': 1e-4,
             'lr_encoder': 1.5e-4,
             'weight_decay': 1e-4,
@@ -146,7 +146,8 @@ def run_single_model(
             'simplify': False,
             'tensorrt': False,
             'dry-run': False})
-    )
+        )
+    
     model, criterion, postprocessors = build_model(cfg)
     checkpoint = torch.load(local_path, map_location='cpu')
     model.load_state_dict(checkpoint['model'], strict=True)
