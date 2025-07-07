@@ -105,6 +105,7 @@ default_model_parameters =   {'lr': 1e-4,
             'dist_url': 'env://',
             'sync_bn': True,
             'fp16_eval': False,
+            'num_queries': 300,
 
             # ONNX export default (unused unless --subcommand is export_model)
             'shape': (640, 640),
