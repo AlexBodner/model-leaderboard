@@ -4,6 +4,7 @@ set -e
 current_path=$(pwd)
 
 folders=(
+    "lw-detr"
     "yolov12"
     'rf-detr'
     "yolov9"
