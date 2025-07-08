@@ -20,7 +20,6 @@ MODEL_CONFIGS = {
         "square_resize_div_64": True,
         "use_ema": True,
         "eval": True,
-        "dataset_file": "coco",
         "device": "cuda",
     },
     "lwdetr_small_60e_coco": {

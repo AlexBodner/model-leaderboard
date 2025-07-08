@@ -28,7 +28,6 @@ from utils import (
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "./LW-DETR/")))
 from util.misc import nested_tensor_from_tensor_list
-from util.utils import ModelEma
 
 from models import build_model
 
@@ -45,18 +44,97 @@ PAPER_URL = "https://arxiv.org/abs/2304.08069"
 REPO_ID = "xbsu/LW-DETR"
 SUBDIR = "pretrain_weights"
 COCO_CLASSES = [
-    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
-    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
-    'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-    'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana',
-    'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut',
-    'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table', 'N/A', 'N/A',
-    'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
-    'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+    "__background__",
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
 ]
 all_files = list_repo_files(REPO_ID)
 weight_files = [f for f in all_files if f.startswith(SUBDIR) and f.endswith(".pth")]
@@ -67,7 +145,6 @@ for file_path in weight_files:
     model_name = os.path.splitext(os.path.basename(file_path))[
         0
     ]  # e.g., "LWDETR_tiny_60e_coco"
-    print(f"Model name: {model_name}")
     MODEL_DICT[model_name] = file_path
 
 
@@ -121,8 +198,8 @@ default_model_parameters = {
     "sync_bn": True,
     "fp16_eval": False,
     "num_queries": 300,
-
 }
+
 
 def create_coco_id_mapping(coco_id_to_name, coco_classes_list):
     name_to_index = {name: idx for idx, name in enumerate(coco_classes_list)}
@@ -160,8 +237,6 @@ def run_single_model(
     skip_if_result_exists=False,
     dataset: Optional[sv.DetectionDataset] = None,
 ) -> None:
-    model_values = MODEL_DICT[model_id]
-
     if skip_if_result_exists and result_json_already_exists(model_id):
         print(f"Skipping {model_id}. Result already exists!")
         return
@@ -171,7 +246,6 @@ def run_single_model(
 
     model_cfg = MODEL_CONFIGS.get(model_id.lower(), None)
     if model_cfg is None:
-        print("There is no config available for model:", model_id.lower())
         return
     model_cfg.update(default_model_parameters)
     cfg = SimpleNamespace(**model_cfg)
@@ -184,10 +258,6 @@ def run_single_model(
     model.eval()
     criterion.eval()
 
-    if cfg.use_ema:
-        ema_m = ModelEma(model, decay=cfg.ema_decay)
-    else:
-        ema_m = None
     predictions = []
     targets = []
     print("Evaluating...")
@@ -230,10 +300,7 @@ def run_single_model(
 
     mAP_metric = MeanAveragePrecision()
     f1_metric = F1Score()
-    print("labels", labels[:10])
 
-    print("predictions",predictions[:10])
-    print("target",targets[:10])
     f1_result = f1_metric.update(predictions, targets).compute()
     mAP_result = mAP_metric.update(predictions, targets).compute()
 
@@ -251,6 +318,7 @@ def run_single_model(
     print(f"mAP result 50:95 100 dets: {mAP_result.map50_95}")
 
     print(f"mAP result 50:95 100 dets rounded: {mAP_result.map50_95:.3f}")
+
 
 def run(
     model_ids: List[str],
