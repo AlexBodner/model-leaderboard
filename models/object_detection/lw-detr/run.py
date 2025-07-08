@@ -132,9 +132,7 @@ def preprocess_image(image_path):
     transform = transforms.Compose(
         [
             transforms.Resize([640, 640]),
-            transforms.ToTensor(),
-
-           # normalize,
+            normalize,
         ]
     )
     image = transform(image)
@@ -211,10 +209,10 @@ def run_single_model(
 
     mAP_metric = MeanAveragePrecision()
     f1_metric = F1Score()
-    print("labels", labels)
+    print("labels", labels[:10])
 
-    print("predictions",predictions)
-    print("target",predictions)
+    print("predictions",predictions[:10])
+    print("target",targets[:10])
     f1_result = f1_metric.update(predictions, targets).compute()
     mAP_result = mAP_metric.update(predictions, targets).compute()
 
