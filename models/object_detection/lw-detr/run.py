@@ -44,7 +44,20 @@ PAPER_URL = "https://arxiv.org/abs/2304.08069"
 
 REPO_ID = "xbsu/LW-DETR"
 SUBDIR = "pretrain_weights"
-
+COCO_CLASSES = [
+    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
+    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
+    'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+    'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana',
+    'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut',
+    'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table', 'N/A', 'N/A',
+    'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
+    'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+]
 all_files = list_repo_files(REPO_ID)
 weight_files = [f for f in all_files if f.startswith(SUBDIR) and f.endswith(".pth")]
 
@@ -108,15 +121,18 @@ default_model_parameters = {
     "sync_bn": True,
     "fp16_eval": False,
     "num_queries": 300,
-    # ONNX export default (unused unless --subcommand is export_model)
-    # "shape": (640, 640),
-    # "infer_dir": None,
-    # "verbose": False,
-    # "opset_version": 17,
-    # "simplify": False,
-    # "tensorrt": False,
-    # "dry-run": False,
+
 }
+
+def create_coco_id_mapping(coco_id_to_name, coco_classes_list):
+    name_to_index = {name: idx for idx, name in enumerate(coco_classes_list)}
+    coco_id_mapping = {}
+    for coco_id, class_name in coco_id_to_name.items():
+        if class_name in name_to_index:
+            coco_id_mapping[coco_id] = name_to_index[class_name]
+        else:
+            continue
+    return coco_id_mapping
 
 
 def preprocess_image(image_path):
@@ -175,6 +191,10 @@ def run_single_model(
     predictions = []
     targets = []
     print("Evaluating...")
+
+    coco_id_mapping = create_coco_id_mapping(COCO_CLASSES, dataset.classes)
+    coco_id_vectorized_map = np.vectorize(coco_id_mapping.__getitem__)
+
     for img_path, image, target_detections in tqdm(dataset, total=len(dataset)):
         image, orig_image_size = preprocess_image(img_path)
         image = image.to(DEVICE)
@@ -187,11 +207,7 @@ def run_single_model(
         orig_image_sizes = torch.stack([orig_image_size])
         # postprocess
         preds = postprocessors["bbox"](outputs, orig_image_sizes)
-        print('preds',preds)
         boxes = preds[0]["boxes"].cpu().numpy()
-        print('pred',boxes)
-        print('target detections',target_detections)
-        
         labels = preds[0]["labels"].cpu().numpy()
         scores = preds[0]["scores"].cpu().numpy()
         class_id = np.atleast_1d(labels).astype(int)
@@ -203,8 +219,10 @@ def run_single_model(
             confidence=confidence,
             class_id=class_id,
         )
-
         detections = detections[detections.confidence > CONFIDENCE_THRESHOLD]
+
+        detections.class_id = coco_id_vectorized_map(detections.class_id)
+
         predictions.append(detections)
 
         target_detections.mask = None
