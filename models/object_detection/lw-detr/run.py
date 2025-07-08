@@ -246,6 +246,7 @@ def run_single_model(
 
     model_cfg = MODEL_CONFIGS.get(model_id.lower(), None)
     if model_cfg is None:
+        print(f"Skipping {model_id}. Model was not setup for running because is a Pre-Training checkpoint.")
         return
     model_cfg.update(default_model_parameters)
     cfg = SimpleNamespace(**model_cfg)

@@ -30,7 +30,7 @@ MODEL_CONFIGS = {
         "dec_layers": 3,
         "group_detr": 13,
         "two_stage": True,
-        "projector_scale": "P4",
+        "projector_scale": ["P4"],
         "hidden_dim": 256,
         "sa_nheads": 8,
         "ca_nheads": 16,
