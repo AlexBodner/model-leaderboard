@@ -109,13 +109,13 @@ default_model_parameters = {
     "fp16_eval": False,
     "num_queries": 300,
     # ONNX export default (unused unless --subcommand is export_model)
-    "shape": (640, 640),
-    "infer_dir": None,
-    "verbose": False,
-    "opset_version": 17,
-    "simplify": False,
-    "tensorrt": False,
-    "dry-run": False,
+    # "shape": (640, 640),
+    # "infer_dir": None,
+    # "verbose": False,
+    # "opset_version": 17,
+    # "simplify": False,
+    # "tensorrt": False,
+    # "dry-run": False,
 }
 
 
@@ -166,6 +166,7 @@ def run_single_model(
 
     model.to(DEVICE)
     model.eval()
+    criterion.eval()
 
     if cfg.use_ema:
         ema_m = ModelEma(model, decay=cfg.ema_decay)
@@ -186,9 +187,11 @@ def run_single_model(
         orig_image_sizes = torch.stack([orig_image_size])
         # postprocess
         preds = postprocessors["bbox"](outputs, orig_image_sizes)
-
-        # visualize
+        print('preds',preds)
         boxes = preds[0]["boxes"].cpu().numpy()
+        print('pred',boxes)
+        print('target detections',target_detections)
+        
         labels = preds[0]["labels"].cpu().numpy()
         scores = preds[0]["scores"].cpu().numpy()
         class_id = np.atleast_1d(labels).astype(int)
