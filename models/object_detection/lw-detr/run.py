@@ -9,7 +9,7 @@ import numpy as np
 import supervision as sv
 import torch
 import torchvision.transforms as T
-from huggingface_hub import hf_hub_download, list_repo_files
+from huggingface_hub import hf_hub_download
 from PIL import Image
 from supervision.metrics import F1Score, MeanAveragePrecision
 from torchvision import transforms
@@ -19,7 +19,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 import multiprocessing
 
 from configs import CONFIDENCE_THRESHOLD, DATASET_DIR
-from model_configs import MODEL_CONFIGS
+from model_configs import MODEL_CONFIGS, default_model_parameters, MODEL_DICT, REPO_ID, COCO_CLASSES
 from utils import (
     load_detections_dataset,
     result_json_already_exists,
@@ -40,166 +40,10 @@ RUN_PARAMETERS = dict(
 GIT_REPO_URL = "https://github.com/lyuwenyu/RT-DETR"
 PAPER_URL = "https://arxiv.org/abs/2304.08069"
 
-
-REPO_ID = "xbsu/LW-DETR"
-SUBDIR = "pretrain_weights"
-COCO_CLASSES = [
-    "__background__",
-    "person",
-    "bicycle",
-    "car",
-    "motorcycle",
-    "airplane",
-    "bus",
-    "train",
-    "truck",
-    "boat",
-    "traffic light",
-    "fire hydrant",
-    "N/A",
-    "stop sign",
-    "parking meter",
-    "bench",
-    "bird",
-    "cat",
-    "dog",
-    "horse",
-    "sheep",
-    "cow",
-    "elephant",
-    "bear",
-    "zebra",
-    "giraffe",
-    "N/A",
-    "backpack",
-    "umbrella",
-    "N/A",
-    "N/A",
-    "handbag",
-    "tie",
-    "suitcase",
-    "frisbee",
-    "skis",
-    "snowboard",
-    "sports ball",
-    "kite",
-    "baseball bat",
-    "baseball glove",
-    "skateboard",
-    "surfboard",
-    "tennis racket",
-    "bottle",
-    "N/A",
-    "wine glass",
-    "cup",
-    "fork",
-    "knife",
-    "spoon",
-    "bowl",
-    "banana",
-    "apple",
-    "sandwich",
-    "orange",
-    "broccoli",
-    "carrot",
-    "hot dog",
-    "pizza",
-    "donut",
-    "cake",
-    "chair",
-    "couch",
-    "potted plant",
-    "bed",
-    "N/A",
-    "dining table",
-    "N/A",
-    "N/A",
-    "toilet",
-    "N/A",
-    "tv",
-    "laptop",
-    "mouse",
-    "remote",
-    "keyboard",
-    "cell phone",
-    "microwave",
-    "oven",
-    "toaster",
-    "sink",
-    "refrigerator",
-    "N/A",
-    "book",
-    "clock",
-    "vase",
-    "scissors",
-    "teddy bear",
-    "hair drier",
-    "toothbrush",
-]
-all_files = list_repo_files(REPO_ID)
-weight_files = [f for f in all_files if f.startswith(SUBDIR) and f.endswith(".pth")]
-
-MODEL_DICT = {}
-
-for file_path in weight_files:
-    model_name = os.path.splitext(os.path.basename(file_path))[
-        0
-    ]  # e.g., "LWDETR_tiny_60e_coco"
-    MODEL_DICT[model_name] = file_path
-
-
 TRANSFORMS = T.Compose(
     [T.Resize((RUN_PARAMETERS["imgsz"], RUN_PARAMETERS["imgsz"])), T.ToTensor()]
 )
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-default_model_parameters = {
-    "lr": 1e-4,
-    "lr_encoder": 1.5e-4,
-    "weight_decay": 1e-4,
-    "epochs": 12,
-    "lr_drop": 11,
-    "clip_max_norm": 0.1,
-    "lr_vit_layer_decay": 0.8,
-    "lr_component_decay": 1.0,
-    "dropout": 0,
-    "drop_path": 0,
-    "drop_mode": "standard",
-    "drop_schedule": "constant",
-    "cutoff_epoch": 0,
-    "position_embedding": "sine",
-    "dim_feedforward": 2048,
-    "decoder_norm": "LN",
-    "set_cost_class": 2.0,
-    "set_cost_bbox": 5.0,
-    "set_cost_giou": 2.0,
-    "cls_loss_coef": 2.0,
-    "bbox_loss_coef": 5.0,
-    "giou_loss_coef": 2.0,
-    "focal_alpha": 0.25,
-    "aux_loss": True,
-    "sum_group_losses": False,
-    "use_varifocal_loss": False,
-    "use_position_supervised_loss": False,
-    "ia_bce_loss": False,
-    "pretrained_encoder": None,
-    "pretrain_weights": None,
-    "pretrain_exclude_keys": None,
-    "pretrain_keys_modify_to_load": None,
-    "output_dir": "output",
-    "checkpoint_interval": 10,
-    "seed": 42,
-    "resume": "",
-    "start_epoch": 0,
-    "ema_decay": 0.9997,
-    "num_workers": 2,
-    "device": "cuda",
-    "world_size": 1,
-    "dist_url": "env://",
-    "sync_bn": True,
-    "fp16_eval": False,
-    "num_queries": 300,
-}
-
 
 def create_coco_id_mapping(coco_id_to_name, coco_classes_list):
     name_to_index = {name: idx for idx, name in enumerate(coco_classes_list)}
