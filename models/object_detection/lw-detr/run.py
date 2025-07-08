@@ -132,6 +132,8 @@ def preprocess_image(image_path):
     transform = transforms.Compose(
         [
             transforms.Resize([640, 640]),
+            transforms.ToTensor(),
+
            # normalize,
         ]
     )
