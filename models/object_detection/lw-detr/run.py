@@ -127,7 +127,7 @@ default_model_parameters = {
 def create_coco_id_mapping(coco_id_to_name, coco_classes_list):
     name_to_index = {name: idx for idx, name in enumerate(coco_classes_list)}
     coco_id_mapping = {}
-    for coco_id, class_name in coco_id_to_name.items():
+    for coco_id, class_name in enumerate(coco_id_to_name):
         if class_name in name_to_index:
             coco_id_mapping[coco_id] = name_to_index[class_name]
         else:
