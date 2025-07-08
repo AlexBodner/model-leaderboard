@@ -22,7 +22,8 @@ MODEL_CONFIGS = {
         "square_resize_div_64": True,
         "use_ema": True,
         "eval": True,
-        "device": "cuda",
+        "num_queries": 300,
+
     },
     "lwdetr_small_60e_coco": {
         "encoder": "vit_tiny",
@@ -41,8 +42,8 @@ MODEL_CONFIGS = {
         "lite_refpoint_refine": True,
         "num_select": 300,
         "confidence_threshold": 0.5,
-        "dataset_file": "coco",
-        "device": "cuda",
+        "num_queries": 300,
+
     },
     "lwdetr_xlarge_60e_coco": {
         "batch_size": 1,
@@ -64,8 +65,8 @@ MODEL_CONFIGS = {
         "square_resize_div_64": True,
         "use_ema": True,
         "eval": True,
-        "dataset_file": "coco",
-        "device": "cuda",
+        "num_queries": 300,
+
     },
     "lwdetr_medium_60e_coco": {
         "batch_size": 1,
@@ -87,6 +88,8 @@ MODEL_CONFIGS = {
         "square_resize_div_64": True,
         "use_ema": True,
         "eval": True,
+        "num_queries": 300,
+
     },
     "lwdetr_tiny_60e_coco": {
         "batch_size": 1,
@@ -110,11 +113,11 @@ MODEL_CONFIGS = {
         "square_resize_div_64": True,
         "use_ema": True,
         "eval": True,
-        "device": "cuda",
     },
 }
 default_model_parameters = {
     "dataset_file": "coco",
+    "device": "cuda",
     "lr": 1e-4,
     "lr_encoder": 1.5e-4,
     "weight_decay": 1e-4,
@@ -159,7 +162,6 @@ default_model_parameters = {
     "dist_url": "env://",
     "sync_bn": True,
     "fp16_eval": False,
-    "num_queries": 300,
 }
 
 
