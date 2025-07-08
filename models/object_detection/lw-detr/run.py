@@ -19,7 +19,13 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 import multiprocessing
 
 from configs import CONFIDENCE_THRESHOLD, DATASET_DIR
-from model_configs import MODEL_CONFIGS, default_model_parameters, MODEL_DICT, REPO_ID, COCO_CLASSES
+from model_configs import (
+    COCO_CLASSES,
+    MODEL_CONFIGS,
+    MODEL_DICT,
+    REPO_ID,
+    default_model_parameters,
+)
 from utils import (
     load_detections_dataset,
     result_json_already_exists,
@@ -44,6 +50,7 @@ TRANSFORMS = T.Compose(
     [T.Resize((RUN_PARAMETERS["imgsz"], RUN_PARAMETERS["imgsz"])), T.ToTensor()]
 )
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def create_coco_id_mapping(coco_id_to_name, coco_classes_list):
     name_to_index = {name: idx for idx, name in enumerate(coco_classes_list)}
@@ -90,7 +97,9 @@ def run_single_model(
 
     model_cfg = MODEL_CONFIGS.get(model_id.lower(), None)
     if model_cfg is None:
-        print(f"Skipping {model_id}. Model was not setup for running because is a Pre-Training checkpoint.")
+        print(
+            f"Skipping {model_id}. Model was not setup for running because is a Pre-Training checkpoint."  # noqa: E501
+        )
         return
     model_cfg.update(default_model_parameters)
     cfg = SimpleNamespace(**model_cfg)
@@ -149,9 +158,13 @@ def run_single_model(
     f1_result = f1_metric.update(predictions, targets).compute()
     mAP_result = mAP_metric.update(predictions, targets).compute()
 
+    model_name = (
+        model_id.replace("_60e_coco", "").replace("_", "-").replace("LWDETR", "LW-DETR")  # noqa: E501
+    )
+
     write_result_json(
         model_id=model_id,
-        model_name=model_id,
+        model_name=model_name,
         model_git_url=GIT_REPO_URL,
         paper_url=PAPER_URL,
         model=model,

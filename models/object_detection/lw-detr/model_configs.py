@@ -1,5 +1,7 @@
-from huggingface_hub import  list_repo_files
 import os
+
+from huggingface_hub import list_repo_files
+
 MODEL_CONFIGS = {
     "lwdetr_large_60e_coco": {
         "batch_size": 2,
@@ -23,7 +25,6 @@ MODEL_CONFIGS = {
         "use_ema": True,
         "eval": True,
         "num_queries": 300,
-
     },
     "lwdetr_small_60e_coco": {
         "encoder": "vit_tiny",
@@ -43,7 +44,6 @@ MODEL_CONFIGS = {
         "num_select": 300,
         "confidence_threshold": 0.5,
         "num_queries": 300,
-
     },
     "lwdetr_xlarge_60e_coco": {
         "batch_size": 1,
@@ -66,7 +66,6 @@ MODEL_CONFIGS = {
         "use_ema": True,
         "eval": True,
         "num_queries": 300,
-
     },
     "lwdetr_medium_60e_coco": {
         "batch_size": 1,
@@ -89,7 +88,6 @@ MODEL_CONFIGS = {
         "use_ema": True,
         "eval": True,
         "num_queries": 300,
-
     },
     "lwdetr_tiny_60e_coco": {
         "batch_size": 1,
@@ -157,7 +155,6 @@ default_model_parameters = {
     "start_epoch": 0,
     "ema_decay": 0.9997,
     "num_workers": 2,
-    "device": "cuda",
     "world_size": 1,
     "dist_url": "env://",
     "sync_bn": True,
